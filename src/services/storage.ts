@@ -34,8 +34,11 @@ export const saveWord = async (word: string): Promise<string[]> => {
         const newWords = [...currentWords, normalizedWord];
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newWords));
         return newWords;
-    } catch (e) {
-        console.error('Failed to save word', e);
+    } catch (e: any) {
+        // Don't log duplicate word errors - they are expected
+        if (e.message !== 'DUPLICATE_WORD') {
+            console.error('Failed to save word', e);
+        }
         throw e;
     }
 };

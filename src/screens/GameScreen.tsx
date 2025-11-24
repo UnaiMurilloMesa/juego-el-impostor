@@ -110,15 +110,25 @@ export const GameScreen = ({ navigation, route }: any) => {
                 <Text style={styles.playerName}>{currentPlayerName}</Text>
 
                 {isWordVisible ? (
-                    <View style={styles.card}>
-                        <Text style={styles.cardTitle}>TU PALABRA ES:</Text>
-                        <Text style={[styles.wordText, isImpostor && styles.impostorText]}>
-                            {isImpostor ? 'ERES EL IMPOSTOR' : currentWord.toUpperCase()}
-                        </Text>
-                        <Text style={styles.cardHint}>
-                            {isImpostor ? 'Intenta pasar desapercibido' : 'Memoriza tu palabra'}
-                        </Text>
-                    </View>
+                    <>
+                        <View style={styles.card}>
+                            <Text style={styles.cardTitle}>TU PALABRA ES:</Text>
+                            <Text style={[styles.wordText, isImpostor && styles.impostorText]}>
+                                {isImpostor ? 'ERES EL IMPOSTOR' : currentWord.toUpperCase()}
+                            </Text>
+                            <Text style={styles.cardHint}>
+                                {isImpostor ? 'Intenta pasar desapercibido' : 'Memoriza tu palabra'}
+                            </Text>
+                        </View>
+                        <View style={styles.nextButtonContainer}>
+                            <Button
+                                title={currentPlayerIndex === players.length - 1 ? "COMENZAR JUEGO" : "SIGUIENTE JUGADOR"}
+                                onPress={handleNext}
+                                variant="primary"
+                                style={styles.button}
+                            />
+                        </View>
+                    </>
                 ) : (
                     <Text style={styles.instruction}>
                         Pasa el móvil a {currentPlayerName} y pulsa "Ver Palabra"
@@ -127,14 +137,7 @@ export const GameScreen = ({ navigation, route }: any) => {
             </View>
 
             <View style={styles.footer}>
-                {isWordVisible ? (
-                    <Button
-                        title={currentPlayerIndex === players.length - 1 ? "COMENZAR JUEGO" : "SIGUIENTE JUGADOR"}
-                        onPress={handleNext}
-                        variant="primary"
-                        style={styles.button}
-                    />
-                ) : (
+                {!isWordVisible && (
                     <Button
                         title="VER PALABRA"
                         onPress={handleReveal}
@@ -167,6 +170,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 24,
+    },
+    nextButtonContainer: {
+        marginTop: 32,
+        width: '100%',
+        alignItems: 'center',
     },
     playerName: {
         fontSize: 32,

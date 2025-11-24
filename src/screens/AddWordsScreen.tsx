@@ -12,14 +12,18 @@ export const AddWordsScreen = ({ navigation }: any) => {
 
         try {
             await saveWord(newWord);
-            Alert.alert('Éxito', 'Palabra añadida correctamente');
+            Alert.alert('¡Añadida!', 'La palabra se ha guardado correctamente');
             setNewWord('');
             Keyboard.dismiss();
         } catch (error: any) {
             if (error.message === 'DUPLICATE_WORD') {
-                Alert.alert('Error', 'Esta palabra ya existe en la lista');
+                Alert.alert('Ya existe', 'Esta palabra ya está en tu lista');
+                setNewWord('');
+                Keyboard.dismiss();
             } else {
+                // Only show error for actual failures
                 Alert.alert('Error', 'No se pudo guardar la palabra');
+                console.error('Error saving word:', error);
             }
         }
     };
@@ -35,7 +39,7 @@ export const AddWordsScreen = ({ navigation }: any) => {
 
             <View style={styles.content}>
                 <Text style={styles.description}>
-                    Añade nuevas palabras o frases para jugar.
+                    Añade nuevas palabras para jugar.
                 </Text>
 
                 <View style={styles.inputContainer}>

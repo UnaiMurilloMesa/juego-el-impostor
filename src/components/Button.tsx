@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
         elevation: 8,
     },
     primaryButton: {
-        backgroundColor: '#3b82f6', // Blue-500
+        backgroundColor: '#3b82f6',
     },
     secondaryButton: {
         backgroundColor: 'transparent',
