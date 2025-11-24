@@ -20,7 +20,6 @@ export const HomeScreen = ({ navigation }: any) => {
             <View style={styles.content}>
                 <View style={styles.header}>
                     <Text style={styles.title}>EL IMPOSTOR</Text>
-                    <Text style={styles.subtitle}>Descubre quién miente</Text>
                 </View>
 
                 <View style={styles.buttonContainer}>
@@ -51,7 +50,7 @@ export const HomeScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0f172a', // Slate-900
+        backgroundColor: '#0f172a',
     },
     content: {
         flex: 1,
@@ -66,7 +65,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 42,
         fontWeight: '800',
-        color: '#f8fafc', // Slate-50
+        color: '#f8fafc',
         textAlign: 'center',
         letterSpacing: 2,
         textShadowColor: 'rgba(59, 130, 246, 0.5)',
@@ -75,7 +74,7 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: 18,
-        color: '#94a3b8', // Slate-400
+        color: '#94a3b8',
         marginTop: 8,
         letterSpacing: 1,
     },

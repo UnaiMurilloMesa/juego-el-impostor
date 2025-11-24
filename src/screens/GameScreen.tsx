@@ -57,7 +57,7 @@ export const GameScreen = ({ navigation, route }: any) => {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.centerContent}>
-                    <Text style={styles.title}>¡JUEGO LISTO!</Text>
+                    <Text style={styles.title}>JUEGO LISTO</Text>
                     <Text style={styles.subtitle}>Empieza el jugador:</Text>
                     <Text style={styles.highlightText}>{startPlayer}</Text>
 

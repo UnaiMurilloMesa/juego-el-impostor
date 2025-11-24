@@ -42,3 +42,27 @@ export const saveWord = async (word: string): Promise<string[]> => {
         throw e;
     }
 };
+
+export const deleteWord = async (word: string): Promise<string[]> => {
+    try {
+        const normalizedWord = word.trim().toLowerCase();
+        if (!normalizedWord) return await loadWords();
+
+        const currentWords = await loadWords();
+
+        // Check if word exists
+        if (!currentWords.includes(normalizedWord)) {
+            throw new Error('WORD_NOT_FOUND');
+        }
+
+        const newWords = currentWords.filter(w => w !== normalizedWord);
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newWords));
+        return newWords;
+    } catch (e: any) {
+        // Don't log word not found errors - they are expected
+        if (e.message !== 'WORD_NOT_FOUND') {
+            console.error('Failed to delete word', e);
+        }
+        throw e;
+    }
+};
