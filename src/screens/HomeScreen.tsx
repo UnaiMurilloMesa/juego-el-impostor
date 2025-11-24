@@ -1,26 +1,44 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/Button';
+import { loadPlayers } from '../services/playerStorage';
 
-export const HomeScreen = () => {
+export const HomeScreen = ({ navigation }: any) => {
+    const handleStartGame = async () => {
+        const players = await loadPlayers();
+        if (players.length < 3) {
+            Alert.alert('Error', 'Necesitas al menos 3 jugadores para empezar.');
+            return;
+        }
+        navigation.navigate('Game', { players });
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" />
             <View style={styles.content}>
                 <View style={styles.header}>
                     <Text style={styles.title}>EL IMPOSTOR</Text>
+                    <Text style={styles.subtitle}>Descubre quién miente</Text>
                 </View>
 
                 <View style={styles.buttonContainer}>
                     <Button
                         title="EMPEZAR JUEGO"
-                        onPress={() => console.log('Empezar Juego pressed')}
+                        onPress={handleStartGame}
                         variant="primary"
                         style={styles.button}
                     />
                     <Button
+                        title="AÑADIR JUGADORES"
+                        onPress={() => navigation.navigate('AddPlayers')}
+                        variant="secondary"
+                        style={styles.button}
+                    />
+                    <Button
                         title="AÑADIR PALABRAS"
-                        onPress={() => console.log('Añadir Palabras pressed')}
+                        onPress={() => navigation.navigate('AddWords')}
                         variant="secondary"
                         style={styles.button}
                     />
