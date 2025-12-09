@@ -1,10 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet, StatusBar, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, StatusBar, Alert, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/Button';
+import { TutorialModal } from '../components/TutorialModal';
 import { loadPlayers } from '../services/playerStorage';
 
 export const HomeScreen = ({ navigation }: any) => {
+    const [showTutorial, setShowTutorial] = useState(false);
+
     const handleStartGame = async () => {
         const players = await loadPlayers();
         if (players.length < 3) {
@@ -17,7 +20,24 @@ export const HomeScreen = ({ navigation }: any) => {
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" />
+            <TutorialModal
+                visible={showTutorial}
+                onClose={() => setShowTutorial(false)}
+            />
+
             <View style={styles.content}>
+                <View style={styles.topBar}>
+                    <Pressable style={styles.iconButton}>
+                        <Text style={styles.iconButtonText}>ES</Text>
+                    </Pressable>
+                    <Pressable
+                        style={styles.iconButton}
+                        onPress={() => setShowTutorial(true)}
+                    >
+                        <Text style={styles.iconButtonText}>?</Text>
+                    </Pressable>
+                </View>
+
                 <View style={styles.header}>
                     <Text style={styles.title}>EL IMPOSTOR</Text>
                 </View>
@@ -55,12 +75,39 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         padding: 24,
+        paddingTop: 10,
         justifyContent: 'space-between',
-        paddingVertical: 60,
+    },
+    topBar: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        paddingHorizontal: 10,
+        marginBottom: 20,
     },
     header: {
         alignItems: 'center',
-        marginTop: 40,
+        marginBottom: 40,
+    },
+    iconButton: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: '#1e293b',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2.5,
+        borderColor: '#3b82f6',
+        shadowColor: '#3b82f6',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.5,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    iconButtonText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#3b82f6',
     },
     title: {
         fontSize: 42,
