@@ -21,8 +21,8 @@ export const translations = {
         TUTORIAL_DESC_4: "Lee tu palabra y di una pista relacionada con ella. ¡Pero cuidado! Si es demasiado obvia, el Impostor sabrá la palabra.",
         TUTORIAL_TITLE_5: "La Votación",
         TUTORIAL_DESC_5: "Al acabar la ronda, votad quién creéis que miente. Si expulsáis al Impostor, ganáis. ¡Pero cuidado con echar a vuestros compañeros inocentes!",
-        TUTORIAL_TITLE_6: "Número de Impostores",
-        TUTORIAL_DESC_6: "Menos de 4 jugadores = 1 impostor. Menos de 8 = 2 impostores. Más de 8 = 3 impostores. ¡Estad atentos!",
+        TUTORIAL_TITLE_6: "Número de Impostores y Roles",
+        TUTORIAL_DESC_6: "- 4 o menos: 1 Impostor.\n- 5-6: 1 Impostor, 1 Espía, 1 Ayudante.\n- 7-9: 2 Impostores, 1 Espía, 1 Ayudante.\n- 10+: 3 Impostores, 1 Espía, 1 Ayudante.",
         TUTORIAL_TITLE_7: "¡A Jugar!",
         TUTORIAL_DESC_7: "¡Eso es todo! Que empiece el juego y... ¡cazad al impostor!",
         TUTORIAL_PREV: "Anterior",
@@ -55,6 +55,11 @@ export const translations = {
         SHOW_ROLE: "VER MI PAPEL",
         HIDE_ROLE: "OCULTAR PAPEL",
         IMPOSTOR_LABEL: "ERES EL IMPOSTOR",
+        CITIZEN_LABEL: "ERES UN CIUDADANO",
+        SPY_LABEL: "ERES EL ESPÍA",
+        HELPER_LABEL: "ERES EL AYUDANTE",
+        SPY_GOAL: "Estos son los impostores: {0}. Haz que todos te crean para pillarlos.",
+        HELPER_GOAL: "Debes ayudar al impostor para que no sea eliminado. ¡Disimula!",
         SECRET_WORD_LABEL: "TU PALABRA ES",
         PASS_DEVICE: "Pasa el móvil al siguiente jugador",
         ROUND_FINISHED: "¡Ronda Finalizada!",
@@ -68,6 +73,12 @@ export const translations = {
         IMPORT_SUCCESS: "Lista importada",
         IMPORT_SUCCESS_MSG: "Se han añadido {0} palabras nuevas. Se han omitido {1} duplicadas.",
         IMPORT_ERROR: "Error al importar",
+
+        // Roles Tutorial
+        ROLE_DESC_CITIZEN: "Ciudadano: Tu objetivo es descubrir al impostor sin revelar demasiado la palabra secreta.",
+        ROLE_DESC_IMPOSTOR: "Impostor: No conoces la palabra. Debes pasar desapercibido y engañar a los demás.",
+        ROLE_DESC_SPY: "Espía (solo 5+ jug.): Conoces quiénes son los impostores y la palabra. Tu objetivo es que te crean para pillarlos.",
+        ROLE_DESC_HELPER: "Ayudante (solo 5+ jug.): Conoces la palabra. Debes ayudar al impostor a ganar sin ser descubierto.",
     },
     en: {
         // Home
@@ -89,8 +100,8 @@ export const translations = {
         TUTORIAL_DESC_4: "Read your word and say a clue related to it. But be careful! If it's too obvious, the Impostor will guess the word.",
         TUTORIAL_TITLE_5: "Voting",
         TUTORIAL_DESC_5: "After the round, vote for who you think is lying. If you kick out the Impostor, you win. But be careful not to kick out your innocent friends!",
-        TUTORIAL_TITLE_6: "Number of Impostors",
-        TUTORIAL_DESC_6: "Less than 4 players = 1 impostor. Less than 8 = 2 impostors. More than 8 = 3 impostors. Stay alert!",
+        TUTORIAL_TITLE_6: "Number of Impostors & Roles",
+        TUTORIAL_DESC_6: "- 4 or less: 1 Impostor.\n- 5-6: 1 Impostor, 1 Spy, 1 Helper.\n- 7-9: 2 Impostors, 1 Spy, 1 Helper.\n- 10+: 3 Impostors, 1 Spy, 1 Helper.",
         TUTORIAL_TITLE_7: "Let's Play!",
         TUTORIAL_DESC_7: "That's it! Let the game begin and... catch the impostor!",
         TUTORIAL_PREV: "Previous",
@@ -128,6 +139,11 @@ export const translations = {
         SHOW_ROLE: "SHOW MY ROLE",
         HIDE_ROLE: "HIDE ROLE",
         IMPOSTOR_LABEL: "YOU ARE THE IMPOSTOR",
+        CITIZEN_LABEL: "YOU ARE A CITIZEN",
+        SPY_LABEL: "YOU ARE THE SPY",
+        HELPER_LABEL: "YOU ARE THE HELPER",
+        SPY_GOAL: "These are the impostors: {0}. Make everyone believe you to catch them.",
+        HELPER_GOAL: "You must help the impostor avoid elimination. Blend in!",
         SECRET_WORD_LABEL: "YOUR WORD IS",
         PASS_DEVICE: "Pass the phone to the next player",
         ROUND_FINISHED: "Round Finished!",
@@ -136,5 +152,11 @@ export const translations = {
         PLAY_AGAIN: "PLAY AGAIN",
         EXIT: "EXIT",
         GENERATE_PDF: "GENERATE PDF",
+
+        // Roles Tutorial
+        ROLE_DESC_CITIZEN: "Citizen: Your goal is to find the impostor without revealing the secret word too clearly.",
+        ROLE_DESC_IMPOSTOR: "Impostor: You don't know the word. Blend in and fool the others.",
+        ROLE_DESC_SPY: "Spy (only 5+ players): You know who the impostors are and the word. Help citizens catch them.",
+        ROLE_DESC_HELPER: "Helper (only 5+ players): You know the word. Protect the impostor from being caught.",
     }
 };

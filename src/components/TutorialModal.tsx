@@ -7,13 +7,84 @@ interface TutorialModalProps {
     onClose: () => void;
 }
 
-const TUTORIAL_STEPS_CONFIG = [
+interface TutorialStep {
+    id: number;
+    title?: string;
+    description?: string;
+    image?: any;
+    customContent?: (t: any, styles: any) => React.ReactNode;
+}
+
+const TUTORIAL_STEPS_CONFIG: TutorialStep[] = [
     { id: 1, image: require('../../assets/paso1.png') },
+    {
+        id: 99, // Special ID for roles
+        title: 'PLAYERS_TITLE',
+        customContent: (t: any, styles: any) => (
+            <View style={{ width: '100%', paddingHorizontal: 10 }}>
+                <Text style={styles.roleTitle}>{t('CITIZEN_LABEL')}</Text>
+                <Text style={styles.roleDesc}>{t('ROLE_DESC_CITIZEN')}</Text>
+
+                <Text style={[styles.roleTitle, { color: '#ef4444' }]}>{t('IMPOSTOR_LABEL')}</Text>
+                <Text style={styles.roleDesc}>{t('ROLE_DESC_IMPOSTOR')}</Text>
+
+                <Text style={[styles.roleTitle, { color: '#f59e0b' }]}>{t('SPY_LABEL')}</Text>
+                <Text style={styles.roleDesc}>{t('ROLE_DESC_SPY')}</Text>
+
+                <Text style={[styles.roleTitle, { color: '#a855f7' }]}>{t('HELPER_LABEL')}</Text>
+                <Text style={styles.roleDesc}>{t('ROLE_DESC_HELPER')}</Text>
+            </View>
+        )
+    },
     { id: 2, image: require('../../assets/paso2.png') },
     { id: 3, image: require('../../assets/paso3.png') },
     { id: 4, image: require('../../assets/paso4.png') },
     { id: 5, image: require('../../assets/paso5.png') },
-    { id: 6, image: undefined },
+    {
+        id: 6,
+        image: undefined,
+        customContent: (t: any, styles: any) => (
+            <View style={{ width: '100%', paddingHorizontal: 10 }}>
+                {/* <= 4 Players */}
+                <View style={styles.ruleRow}>
+                    <Text style={styles.ruleRange}>≤ 4</Text>
+                    <View style={styles.ruleContent}>
+                        <Text style={[styles.ruleText, { color: '#ef4444' }]}>1 Impostor</Text>
+                    </View>
+                </View>
+
+                {/* 5-6 Players */}
+                <View style={styles.ruleRow}>
+                    <Text style={styles.ruleRange}>5 - 6</Text>
+                    <View style={styles.ruleContent}>
+                        <Text style={[styles.ruleText, { color: '#ef4444' }]}>1 Impostor</Text>
+                        <Text style={[styles.ruleText, { color: '#f59e0b' }]}>1 {t('ROLE_DESC_SPY').split(':')[0]}</Text>
+                        <Text style={[styles.ruleText, { color: '#a855f7' }]}>1 {t('ROLE_DESC_HELPER').split(':')[0]}</Text>
+                    </View>
+                </View>
+
+                {/* 7-9 Players */}
+                <View style={styles.ruleRow}>
+                    <Text style={styles.ruleRange}>7 - 9</Text>
+                    <View style={styles.ruleContent}>
+                        <Text style={[styles.ruleText, { color: '#ef4444' }]}>2 Impostors</Text>
+                        <Text style={[styles.ruleText, { color: '#f59e0b' }]}>1 {t('ROLE_DESC_SPY').split(':')[0]}</Text>
+                        <Text style={[styles.ruleText, { color: '#a855f7' }]}>1 {t('ROLE_DESC_HELPER').split(':')[0]}</Text>
+                    </View>
+                </View>
+
+                {/* 10+ Players */}
+                <View style={styles.ruleRow}>
+                    <Text style={styles.ruleRange}>10+</Text>
+                    <View style={styles.ruleContent}>
+                        <Text style={[styles.ruleText, { color: '#ef4444' }]}>3 Impostors</Text>
+                        <Text style={[styles.ruleText, { color: '#f59e0b' }]}>1 {t('ROLE_DESC_SPY').split(':')[0]}</Text>
+                        <Text style={[styles.ruleText, { color: '#a855f7' }]}>1 {t('ROLE_DESC_HELPER').split(':')[0]}</Text>
+                    </View>
+                </View>
+            </View>
+        )
+    },
     { id: 7, image: require('../../assets/paso7.png') }
 ];
 
@@ -41,8 +112,9 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ visible, onClose }
     };
 
     const currentConfig = TUTORIAL_STEPS_CONFIG[currentStep];
-    const titleKey = `TUTORIAL_TITLE_${currentConfig.id}`;
-    const descKey = `TUTORIAL_DESC_${currentConfig.id}`;
+    // Use config title if available, else derive from ID
+    const titleKey = currentConfig.title || `TUTORIAL_TITLE_${currentConfig.id}`;
+    const descKey = currentConfig.description || `TUTORIAL_DESC_${currentConfig.id}`;
 
     return (
         <Modal
@@ -62,21 +134,28 @@ export const TutorialModal: React.FC<TutorialModalProps> = ({ visible, onClose }
                             {t(titleKey as any)}
                         </Text>
 
-                        {currentConfig.image && (
-                            <Image
-                                source={currentConfig.image}
-                                style={styles.stepImage}
-                                resizeMode="contain"
-                            />
+                        {currentConfig.customContent ? (
+                            <ScrollView style={styles.scrollView}>
+                                {currentConfig.customContent(t, styles)}
+                            </ScrollView>
+                        ) : (
+                            <>
+                                {currentConfig.image && (
+                                    <Image
+                                        source={currentConfig.image}
+                                        style={styles.stepImage}
+                                        resizeMode="contain"
+                                    />
+                                )}
+                                <ScrollView style={styles.scrollView}>
+                                    <Text style={styles.stepDescription}>
+                                        {t(descKey as any)}
+                                    </Text>
+                                </ScrollView>
+                            </>
                         )}
 
-                        <ScrollView style={styles.scrollView}>
-                            <Text style={styles.stepDescription}>
-                                {t(descKey as any)}
-                            </Text>
-                        </ScrollView>
-
-                        <View style={styles.progressContainer}>
+                        <View style={styles.paginationContainer}>
                             {TUTORIAL_STEPS_CONFIG.map((_, index) => (
                                 <View
                                     key={index}
@@ -182,20 +261,34 @@ const styles = StyleSheet.create({
         lineHeight: 28,
         paddingHorizontal: 10,
     },
-    progressContainer: {
+    paginationContainer: {
         flexDirection: 'row',
-        marginTop: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
         gap: 8,
-        marginBottom: 10,
     },
     dot: {
         width: 8,
         height: 8,
         borderRadius: 4,
+        backgroundColor: '#334155',
     },
     activeDot: {
         backgroundColor: '#3b82f6',
-        width: 24,
+        width: 20,
+    },
+    roleTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#3b82f6',
+        marginTop: 10,
+        marginBottom: 2,
+    },
+    roleDesc: {
+        fontSize: 14,
+        color: '#94a3b8',
+        lineHeight: 20,
     },
     inactiveDot: {
         backgroundColor: '#475569',
@@ -235,5 +328,29 @@ const styles = StyleSheet.create({
         color: '#ffffff',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    ruleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+        backgroundColor: '#1e293b',
+        borderBottomWidth: 1,
+        borderBottomColor: '#334155',
+        paddingBottom: 8,
+    },
+    ruleRange: {
+        fontSize: 24,
+        fontWeight: '800',
+        color: '#cbd5e1',
+        width: 80,
+    },
+    ruleContent: {
+        flex: 1,
+        flexDirection: 'column',
+    },
+    ruleText: {
+        fontSize: 15,
+        fontWeight: '600',
+        marginBottom: 2,
     },
 });

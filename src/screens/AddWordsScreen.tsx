@@ -13,6 +13,15 @@ export const AddWordsScreen = ({ navigation }: any) => {
     const { t, language } = useLanguage();
     const [newWord, setNewWord] = useState('');
     const [wordToDelete, setWordToDelete] = useState('');
+    const params = (navigation.getState().routes.find((r: any) => r.name === 'AddWords')?.params) || {};
+
+    useEffect(() => {
+        if (params?.importUri) {
+            handleImportFile(params.importUri);
+            // Clear params to avoid loop if necessary, though navigation stack usually handles it
+            navigation.setParams({ importUri: undefined });
+        }
+    }, [params?.importUri]);
 
     const handleAddWord = async () => {
         if (newWord.trim().length === 0) return;
@@ -113,12 +122,16 @@ export const AddWordsScreen = ({ navigation }: any) => {
         try {
             const words = await loadWords();
             const jsonString = JSON.stringify(words, null, 2);
-            const fileUri = FileSystem.documentDirectory + 'el-impostor-words.json';
+            // Use .impostor extension
+            const fileUri = FileSystem.documentDirectory + 'el-impostor-words.impostor';
 
             await FileSystem.writeAsStringAsync(fileUri, jsonString);
 
             if (await Sharing.isAvailableAsync()) {
-                await Sharing.shareAsync(fileUri);
+                await Sharing.shareAsync(fileUri, {
+                    mimeType: 'application/json', // Or application/octet-stream
+                    UTI: 'public.json'
+                });
             } else {
                 Alert.alert('Success', 'File saved to documents');
             }
@@ -128,43 +141,51 @@ export const AddWordsScreen = ({ navigation }: any) => {
         }
     };
 
+    const handleImportFile = async (uri: string) => {
+        try {
+            const fileContent = await FileSystem.readAsStringAsync(uri);
+
+            let importedData;
+            try {
+                importedData = JSON.parse(fileContent);
+            } catch (e) {
+                Alert.alert(t('IMPORT_ERROR'), 'Invalid file format');
+                return;
+            }
+
+            if (!Array.isArray(importedData)) {
+                Alert.alert(t('IMPORT_ERROR'), 'Invalid structure (expected array)');
+                return;
+            }
+
+            const { added, skipped } = await importWords(importedData);
+
+            const msg = t('IMPORT_SUCCESS_MSG')
+                .replace('{0}', added.toString())
+                .replace('{1}', skipped.toString());
+
+            Alert.alert(t('IMPORT_SUCCESS'), msg);
+        } catch (error) {
+            console.error('Error importing file:', error);
+            Alert.alert(t('IMPORT_ERROR'), 'Could not import list');
+        }
+    };
+
     const handleImportJSON = async () => {
         try {
             const result = await DocumentPicker.getDocumentAsync({
-                type: 'application/json',
+                type: '*/*', // Allow all, looking for .impostor or .json
                 copyToCacheDirectory: true
             });
 
             if (result.canceled) return;
 
             const fileUri = result.assets[0].uri;
-            const fileContent = await FileSystem.readAsStringAsync(fileUri);
-
-            let importedData;
-            try {
-                importedData = JSON.parse(fileContent);
-            } catch (e) {
-                Alert.alert(t('IMPORT_ERROR'), 'Invalid JSON format');
-                return;
-            }
-
-            if (!Array.isArray(importedData)) {
-                Alert.alert(t('IMPORT_ERROR'), 'Invalid JSON structure (expected array)');
-                return;
-            }
-
-            const { added, skipped } = await importWords(importedData);
-
-            // Format existing message: "Se han añadido {0} palabras nuevas. Se han omitido {1} duplicadas."
-            const msg = t('IMPORT_SUCCESS_MSG')
-                .replace('{0}', added.toString())
-                .replace('{1}', skipped.toString());
-
-            Alert.alert(t('IMPORT_SUCCESS'), msg);
+            await handleImportFile(fileUri);
 
         } catch (error) {
-            console.error('Error importing JSON:', error);
-            Alert.alert(t('IMPORT_ERROR'), 'Could not import list');
+            console.error('Error picking document:', error);
+            Alert.alert(t('IMPORT_ERROR'), 'Could not pick file');
         }
     };
 

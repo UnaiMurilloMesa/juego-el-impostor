@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/Button';
-import { assignImpostors, selectStartPlayer } from '../services/gameLogic';
+import { assignRoles, selectStartPlayer } from '../services/gameLogic';
 import { loadWords } from '../services/storage';
 import { useLanguage } from '../i18n/LanguageContext';
-import { Word } from '../types';
+import { Word, Role } from '../types';
 
 export const GameScreen = ({ navigation, route }: any) => {
     const { players } = route.params;
@@ -13,7 +13,7 @@ export const GameScreen = ({ navigation, route }: any) => {
 
     // We store the full Word object so we can show it in the correct language
     const [currentWord, setCurrentWord] = useState<Word | null>(null);
-    const [impostorIndices, setImpostorIndices] = useState<number[]>([]);
+    const [roles, setRoles] = useState<Role[]>([]);
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
     const [isWordVisible, setIsWordVisible] = useState(false);
     const [gamePhase, setGamePhase] = useState<'playing' | 'reveal_start' | 'reveal_impostors'>('playing');
@@ -32,13 +32,19 @@ export const GameScreen = ({ navigation, route }: any) => {
         }
 
         const randomWord = words[Math.floor(Math.random() * words.length)];
-        const impostors = assignImpostors(players.length);
+        const newRoles = assignRoles(players.length);
 
         setCurrentWord(randomWord);
-        setImpostorIndices(impostors);
+        setRoles(newRoles);
     };
 
     const finishGame = () => {
+        // Need to get impostor indices for legacy support of selectStartPlayer or update it
+        // For now, let's just find indices of impostors for selectStartPlayer
+        const impostorIndices = roles
+            .map((r, i) => r === 'impostor' ? i : -1)
+            .filter(i => i !== -1);
+
         const starter = selectStartPlayer(players, impostorIndices);
         setStartPlayer(starter);
         setGamePhase('reveal_start');
@@ -77,19 +83,34 @@ export const GameScreen = ({ navigation, route }: any) => {
         );
     }
 
-    // Reveal impostors phase
+    // Reveal impostors phase (Show all roles)
     if (gamePhase === 'reveal_impostors') {
-        const impostorNames = impostorIndices.map(idx => players[idx]);
-
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.centerContent}>
                     <Text style={styles.title}>{t('ROUND_FINISHED')}</Text>
-                    <Text style={styles.subtitle}>{t('IMPOSTOR_LABEL')}:</Text>
 
-                    {impostorNames.map((name, idx) => (
-                        <Text key={idx} style={styles.impostorRevealText}>{name}</Text>
-                    ))}
+                    <ScrollView style={{ width: '100%', maxHeight: '60%' }}>
+                        {players.map((name: string, idx: number) => {
+                            const role = roles[idx];
+                            let roleColor = '#f8fafc'; // Default
+                            if (role === 'impostor') roleColor = '#ef4444';
+                            if (role === 'spy') roleColor = '#f59e0b';
+                            if (role === 'helper') roleColor = '#a855f7';
+
+                            return (
+                                <View key={idx} style={styles.roleResultRow}>
+                                    <Text style={styles.resultName}>{name}:</Text>
+                                    <Text style={[styles.resultRole, { color: roleColor }]}>
+                                        {role === 'impostor' ? t('IMPOSTOR_LABEL') :
+                                            role === 'spy' ? t('SPY_LABEL') :
+                                                role === 'helper' ? t('HELPER_LABEL') :
+                                                    t('CITIZEN_LABEL')}
+                                    </Text>
+                                </View>
+                            );
+                        })}
+                    </ScrollView>
 
                     <Button
                         title={t('EXIT')}
@@ -103,10 +124,49 @@ export const GameScreen = ({ navigation, route }: any) => {
     }
 
     const currentPlayerName = players[currentPlayerIndex];
-    const isImpostor = impostorIndices.includes(currentPlayerIndex);
-
-    // Get word in current language
+    const currentRole = roles[currentPlayerIndex];
     const displayWord = currentWord ? currentWord[language] : '';
+
+    const getRoleContent = () => {
+        if (currentRole === 'impostor') {
+            return {
+                title: t('IMPOSTOR_LABEL'),
+                word: t('IMPOSTOR_LABEL'), // Or leave empty/special text
+                hint: t('TUTORIAL_DESC_3'),
+                isImpostor: true,
+                color: '#ef4444'
+            };
+        } else if (currentRole === 'spy') {
+            // Spy sees the impostors
+            const impostorNames = players.filter((_p: string, idx: number) => roles[idx] === 'impostor').join(', ');
+            return {
+                title: t('SPY_LABEL'),
+                word: displayWord.toUpperCase(),
+                hint: t('SPY_GOAL').replace('{0}', impostorNames),
+                isImpostor: false,
+                color: '#f59e0b' // Amber
+            };
+        } else if (currentRole === 'helper') {
+            return {
+                title: t('HELPER_LABEL'),
+                word: displayWord.toUpperCase(),
+                hint: t('HELPER_GOAL'),
+                isImpostor: false,
+                color: '#a855f7' // Purple
+            };
+        } else {
+            // Citizen
+            return {
+                title: t('SECRET_WORD_LABEL'),
+                word: displayWord.toUpperCase(),
+                hint: t('TUTORIAL_DESC_4'),
+                isImpostor: false,
+                color: '#3b82f6' // Blue
+            };
+        }
+    };
+
+    const content = getRoleContent();
 
     return (
         <SafeAreaView style={styles.container}>
@@ -122,13 +182,13 @@ export const GameScreen = ({ navigation, route }: any) => {
                 {isWordVisible ? (
                     <>
                         <View style={styles.card}>
-                            <Text style={styles.cardTitle}>{t('SECRET_WORD_LABEL')}:</Text>
-                            <Text style={[styles.wordText, isImpostor && styles.impostorText]}>
-                                {isImpostor ? t('IMPOSTOR_LABEL') : displayWord.toUpperCase()}
+                            <Text style={styles.cardTitle}>{content.title}</Text>
+                            <Text style={[styles.wordText, { color: content.color }]}>
+                                {content.word}
                             </Text>
                             <ScrollView style={styles.hintContainer}>
                                 <Text style={styles.cardHint}>
-                                    {isImpostor ? t('TUTORIAL_DESC_3') : t('TUTORIAL_DESC_4')}
+                                    {content.hint}
                                 </Text>
                             </ScrollView>
                         </View>
@@ -280,5 +340,23 @@ const styles = StyleSheet.create({
     button: {
         width: '100%',
         maxWidth: 320,
+    },
+    roleResultRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#1e293b',
+        width: '100%',
+    },
+    resultName: {
+        fontSize: 18,
+        color: '#f8fafc',
+        fontWeight: '600',
+    },
+    resultRole: {
+        fontSize: 18,
+        fontWeight: '700',
     },
 });

@@ -12,8 +12,19 @@
             "resizeMode": "contain",
             "backgroundColor": "#ffffff"
         },
+        "scheme": "el-impostor",
         "ios": {
-            "supportsTablet": true
+            "supportsTablet": true,
+            "bundleIdentifier": "com.unai_murillo.elimpostor",
+            "infoPlist": {
+                "CFBundleURLTypes": [
+                    {
+                        "CFBundleURLSchemes": [
+                            "el-impostor"
+                        ]
+                    }
+                ]
+            }
         },
         "android": {
             "adaptiveIcon": {
@@ -22,7 +33,47 @@
             },
             "edgeToEdgeEnabled": true,
             "predictiveBackGestureEnabled": false,
-            "package": "com.unai_murillo.elimpostor"
+            "package": "com.unai_murillo.elimpostor",
+            "intentFilters": [
+                {
+                    "action": "VIEW",
+                    "autoVerify": true,
+                    "data": [
+                        {
+                            "scheme": "file"
+                        },
+                        {
+                            "mimeType": "*/*"
+                        },
+                        {
+                            "pathPattern": ".*\\.impostor"
+                        }
+                    ],
+                    "category": [
+                        "BROWSABLE",
+                        "DEFAULT"
+                    ]
+                },
+                {
+                    "action": "VIEW",
+                    "autoVerify": true,
+                    "data": [
+                        {
+                            "scheme": "content"
+                        },
+                        {
+                            "mimeType": "*/*"
+                        },
+                        {
+                            "pathPattern": ".*\\.impostor"
+                        }
+                    ],
+                    "category": [
+                        "BROWSABLE",
+                        "DEFAULT"
+                    ]
+                }
+            ]
         },
         "web": {
             "favicon": "./assets/icono-principal.png"
