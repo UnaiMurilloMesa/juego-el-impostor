@@ -57,9 +57,9 @@ const TUTORIAL_STEPS_CONFIG: TutorialStep[] = [
                 <View style={styles.ruleRow}>
                     <Text style={styles.ruleRange}>5 - 6</Text>
                     <View style={styles.ruleContent}>
-                        <Text style={[styles.ruleText, { color: '#ef4444' }]}>1 Impostor</Text>
-                        <Text style={[styles.ruleText, { color: '#f59e0b' }]}>1 {t('ROLE_DESC_SPY').split(':')[0]}</Text>
-                        <Text style={[styles.ruleText, { color: '#a855f7' }]}>1 {t('ROLE_DESC_HELPER').split(':')[0]}</Text>
+                        <Text style={[styles.ruleText, { color: '#ef4444' }]}>1 {t('IMPOSTOR_WORD')}</Text>
+                        <Text style={[styles.ruleText, { color: '#f59e0b' }]}>1 {t('SPY_WORD')}</Text>
+                        <Text style={[styles.ruleText, { color: '#a855f7' }]}>1 {t('HELPER_WORD')}</Text>
                     </View>
                 </View>
 
@@ -67,9 +67,9 @@ const TUTORIAL_STEPS_CONFIG: TutorialStep[] = [
                 <View style={styles.ruleRow}>
                     <Text style={styles.ruleRange}>7 - 9</Text>
                     <View style={styles.ruleContent}>
-                        <Text style={[styles.ruleText, { color: '#ef4444' }]}>2 Impostors</Text>
-                        <Text style={[styles.ruleText, { color: '#f59e0b' }]}>1 {t('ROLE_DESC_SPY').split(':')[0]}</Text>
-                        <Text style={[styles.ruleText, { color: '#a855f7' }]}>1 {t('ROLE_DESC_HELPER').split(':')[0]}</Text>
+                        <Text style={[styles.ruleText, { color: '#ef4444' }]}>2 {t('IMPOSTOR_WORD')}</Text>
+                        <Text style={[styles.ruleText, { color: '#f59e0b' }]}>1 {t('SPY_WORD')}</Text>
+                        <Text style={[styles.ruleText, { color: '#a855f7' }]}>1 {t('HELPER_WORD')}</Text>
                     </View>
                 </View>
 
@@ -77,9 +77,9 @@ const TUTORIAL_STEPS_CONFIG: TutorialStep[] = [
                 <View style={styles.ruleRow}>
                     <Text style={styles.ruleRange}>10+</Text>
                     <View style={styles.ruleContent}>
-                        <Text style={[styles.ruleText, { color: '#ef4444' }]}>3 Impostors</Text>
-                        <Text style={[styles.ruleText, { color: '#f59e0b' }]}>1 {t('ROLE_DESC_SPY').split(':')[0]}</Text>
-                        <Text style={[styles.ruleText, { color: '#a855f7' }]}>1 {t('ROLE_DESC_HELPER').split(':')[0]}</Text>
+                        <Text style={[styles.ruleText, { color: '#ef4444' }]}>3 {t('IMPOSTOR_WORD')}</Text>
+                        <Text style={[styles.ruleText, { color: '#f59e0b' }]}>1 {t('SPY_WORD')}</Text>
+                        <Text style={[styles.ruleText, { color: '#a855f7' }]}>1 {t('HELPER_WORD')}</Text>
                     </View>
                 </View>
             </View>

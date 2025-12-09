@@ -75,10 +75,14 @@ export const translations = {
         IMPORT_ERROR: "Error al importar",
 
         // Roles Tutorial
+        IMPOSTOR_WORD: "Impostores",
+        SPY_WORD: "Espía",
+        HELPER_WORD: "Ayudante del impostor",
+
         ROLE_DESC_CITIZEN: "Ciudadano: Tu objetivo es descubrir al impostor sin revelar demasiado la palabra secreta.",
         ROLE_DESC_IMPOSTOR: "Impostor: No conoces la palabra. Debes pasar desapercibido y engañar a los demás.",
-        ROLE_DESC_SPY: "Espía (solo 5+ jug.): Conoces quiénes son los impostores y la palabra. Tu objetivo es que te crean para pillarlos.",
-        ROLE_DESC_HELPER: "Ayudante (solo 5+ jug.): Conoces la palabra. Debes ayudar al impostor a ganar sin ser descubierto.",
+        ROLE_DESC_SPY: "Espía (solo 5+ jug.): Conoces quiénes son los impostores y la palabra. Tu objetivo es que te crean para pillarlos. No puedes decir que eres el espía.",
+        ROLE_DESC_HELPER: "Ayudante (solo 5+ jug.): Conoces la palabra. Debes ayudar al impostor a ganar sin ser descubierto, pero debes permanecer vivo durante toda la partida para ganar con el impostor.",
     },
     en: {
         // Home
@@ -154,9 +158,13 @@ export const translations = {
         GENERATE_PDF: "GENERATE PDF",
 
         // Roles Tutorial
+        IMPOSTOR_WORD: "Impostors",
+        SPY_WORD: "Spy",
+        HELPER_WORD: "Helper",
+
         ROLE_DESC_CITIZEN: "Citizen: Your goal is to find the impostor without revealing the secret word too clearly.",
         ROLE_DESC_IMPOSTOR: "Impostor: You don't know the word. Blend in and fool the others.",
-        ROLE_DESC_SPY: "Spy (only 5+ players): You know who the impostors are and the word. Help citizens catch them.",
-        ROLE_DESC_HELPER: "Helper (only 5+ players): You know the word. Protect the impostor from being caught.",
+        ROLE_DESC_SPY: "Spy (only 5+ players): You know who the impostors are and the word. Help citizens catch them. You can't say that you are the spy.",
+        ROLE_DESC_HELPER: "Helper (only 5+ players): You know the word. Protect the impostor from being caught, but you should stay alive during the whole game to win with the impostor.",
     }
 };
