@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/Button';
-import { saveWord, loadWords, deleteWord } from '../services/storage';
+import { saveWord, loadWords, deleteWord, importWords } from '../services/storage';
+import { useLanguage } from '../i18n/LanguageContext';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as DocumentPicker from 'expo-document-picker';
 
 export const AddWordsScreen = ({ navigation }: any) => {
+    const { t, language } = useLanguage();
     const [newWord, setNewWord] = useState('');
     const [wordToDelete, setWordToDelete] = useState('');
 
@@ -15,18 +19,14 @@ export const AddWordsScreen = ({ navigation }: any) => {
 
         try {
             await saveWord(newWord);
-            Alert.alert('AÑADIDA', 'La palabra se ha guardado correctamente');
+            Alert.alert(t('WORD_ADDED'), t('WORD_ADDED_MSG'));
             setNewWord('');
             Keyboard.dismiss();
         } catch (error: any) {
             if (error.message === 'DUPLICATE_WORD') {
-                Alert.alert('Ya existe', 'Esta palabra ya está en tu lista');
-                setNewWord('');
-                Keyboard.dismiss();
+                Alert.alert(t('WORD_EXISTS'), t('WORD_EXISTS'));
             } else {
-                // Only show error for actual failures
-                Alert.alert('Error', 'No se pudo guardar la palabra');
-                console.error('Error saving word:', error);
+                Alert.alert(t('ERROR_TITLE'), 'Could not save word');
             }
         }
     };
@@ -35,17 +35,27 @@ export const AddWordsScreen = ({ navigation }: any) => {
         if (wordToDelete.trim().length === 0) return;
 
         try {
-            await deleteWord(wordToDelete);
-            Alert.alert('BORRADA', 'La palabra se ha eliminado correctamente');
+            const words = await loadWords();
+            const normalizedInput = wordToDelete.trim().toLowerCase();
+
+            const targetWord = words.find(w =>
+                w.es.toLowerCase() === normalizedInput ||
+                w.en.toLowerCase() === normalizedInput
+            );
+
+            if (!targetWord) {
+                throw new Error('WORD_NOT_FOUND');
+            }
+
+            await deleteWord(targetWord);
+            Alert.alert('Deleted', 'Word deleted successfully');
             setWordToDelete('');
             Keyboard.dismiss();
         } catch (error: any) {
             if (error.message === 'WORD_NOT_FOUND') {
-                Alert.alert('No existe', 'Esta palabra no está en tu lista');
-                setWordToDelete('');
-                Keyboard.dismiss();
+                Alert.alert(t('ERROR_TITLE'), 'Word not found');
             } else {
-                Alert.alert('Error', 'No se pudo borrar la palabra');
+                Alert.alert(t('ERROR_TITLE'), 'Could not delete word');
                 console.error('Error deleting word:', error);
             }
         }
@@ -54,70 +64,107 @@ export const AddWordsScreen = ({ navigation }: any) => {
     const generatePDF = async () => {
         try {
             const words = await loadWords();
+            const title = language === 'es' ? 'El Impostor - Lista de Palabras' : 'The Impostor - Word List';
 
-            // Create HTML content for PDF
             const htmlContent = `
                 <!DOCTYPE html>
                 <html>
                 <head>
                     <meta charset="utf-8">
                     <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            padding: 20px;
-                        }
-                        h1 {
-                            color: #3b82f6;
-                            text-align: center;
-                            margin-bottom: 30px;
-                        }
-                        .word-list {
-                            column-count: 2;
-                            column-gap: 20px;
-                        }
-                        .word-item {
-                            break-inside: avoid;
-                            padding: 8px;
-                            margin-bottom: 5px;
-                            border-bottom: 1px solid #e5e7eb;
-                        }
-                        .footer {
-                            margin-top: 30px;
-                            text-align: center;
-                            color: #6b7280;
-                            font-size: 12px;
-                        }
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { color: #3b82f6; text-align: center; margin-bottom: 30px; }
+                        .word-list { column-count: 2; column-gap: 20px; }
+                        .word-item { break-inside: avoid; padding: 8px; margin-bottom: 5px; border-bottom: 1px solid #e5e7eb; }
+                        .footer { margin-top: 30px; text-align: center; color: #6b7280; font-size: 12px; }
                     </style>
                 </head>
                 <body>
-                    <h1>El Impostor - Lista de Palabras</h1>
-                    <p><strong>Total de palabras:</strong> ${words.length}</p>
+                    <h1>${title}</h1>
+                    <p><strong>Total:</strong> ${words.length}</p>
                     <div class="word-list">
                         ${words.map((word, index) => `
                             <div class="word-item">
-                                ${index + 1}. ${word}
+                                ${index + 1}. ${word[language]}
                             </div>
                         `).join('')}
                     </div>
                     <div class="footer">
-                        Generado el ${new Date().toLocaleDateString('es-ES')}
+                        Generated: ${new Date().toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US')}
                     </div>
                 </body>
                 </html>
             `;
 
-            // Generate PDF
             const { uri } = await Print.printToFileAsync({ html: htmlContent });
 
-            // Share PDF
             if (await Sharing.isAvailableAsync()) {
                 await Sharing.shareAsync(uri);
             } else {
-                Alert.alert('Éxito', 'PDF generado correctamente');
+                Alert.alert('Success', 'PDF generated');
             }
         } catch (error) {
             console.error('Error generating PDF:', error);
-            Alert.alert('Error', 'No se pudo generar el PDF');
+            Alert.alert(t('ERROR_TITLE'), 'Could not generate PDF');
+        }
+    };
+
+    const handleExportJSON = async () => {
+        try {
+            const words = await loadWords();
+            const jsonString = JSON.stringify(words, null, 2);
+            const fileUri = FileSystem.documentDirectory + 'el-impostor-words.json';
+
+            await FileSystem.writeAsStringAsync(fileUri, jsonString);
+
+            if (await Sharing.isAvailableAsync()) {
+                await Sharing.shareAsync(fileUri);
+            } else {
+                Alert.alert('Success', 'File saved to documents');
+            }
+        } catch (error) {
+            console.error('Error exporting JSON:', error);
+            Alert.alert(t('ERROR_TITLE'), 'Could not export list');
+        }
+    };
+
+    const handleImportJSON = async () => {
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                type: 'application/json',
+                copyToCacheDirectory: true
+            });
+
+            if (result.canceled) return;
+
+            const fileUri = result.assets[0].uri;
+            const fileContent = await FileSystem.readAsStringAsync(fileUri);
+
+            let importedData;
+            try {
+                importedData = JSON.parse(fileContent);
+            } catch (e) {
+                Alert.alert(t('IMPORT_ERROR'), 'Invalid JSON format');
+                return;
+            }
+
+            if (!Array.isArray(importedData)) {
+                Alert.alert(t('IMPORT_ERROR'), 'Invalid JSON structure (expected array)');
+                return;
+            }
+
+            const { added, skipped } = await importWords(importedData);
+
+            // Format existing message: "Se han añadido {0} palabras nuevas. Se han omitido {1} duplicadas."
+            const msg = t('IMPORT_SUCCESS_MSG')
+                .replace('{0}', added.toString())
+                .replace('{1}', skipped.toString());
+
+            Alert.alert(t('IMPORT_SUCCESS'), msg);
+
+        } catch (error) {
+            console.error('Error importing JSON:', error);
+            Alert.alert(t('IMPORT_ERROR'), 'Could not import list');
         }
     };
 
@@ -125,55 +172,67 @@ export const AddWordsScreen = ({ navigation }: any) => {
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>← Volver</Text>
+                    <Text style={styles.backButtonText}>← {t('BACK_BTN')}</Text>
                 </TouchableOpacity>
-                <Text style={styles.title}>Añadir Palabras</Text>
+                <Text style={styles.title}>{t('WORDS_TITLE')}</Text>
             </View>
 
             <View style={styles.content}>
-                <Text style={styles.description}>
-                    Añade nuevas palabras para jugar.
-                </Text>
-
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={styles.input}
-                        placeholder="Nueva palabra..."
+                        placeholder={t('ADD_WORD_PLACEHOLDER')}
                         placeholderTextColor="#64748b"
                         value={newWord}
                         onChangeText={setNewWord}
                         autoCapitalize="none"
                     />
                     <Button
-                        title="Añadir"
+                        title={t('ADD_WORD_BTN')}
                         onPress={handleAddWord}
                         variant="primary"
                         style={styles.addButton}
                     />
                 </View>
 
-                <View style={styles.pdfButtonContainer}>
+                <View style={styles.actionButtons}>
                     <Button
-                        title="GENERAR PDF"
+                        title={t('GENERATE_PDF')}
                         onPress={generatePDF}
                         variant="secondary"
-                        style={styles.pdfButton}
+                        style={styles.actionBtn}
                     />
+                    <View style={styles.rowButtons}>
+                        <Button
+                            title={t('EXPORT_JSON')}
+                            onPress={handleExportJSON}
+                            variant="secondary"
+                            size="small"
+                            style={styles.halfBtn}
+                        />
+                        <Button
+                            title={t('IMPORT_JSON')}
+                            onPress={handleImportJSON}
+                            variant="secondary"
+                            size="small"
+                            style={styles.halfBtn}
+                        />
+                    </View>
                 </View>
 
                 <View style={styles.deleteSection}>
-                    <Text style={styles.sectionTitle}>Borrar palabra</Text>
+                    <Text style={styles.sectionTitle}>{t('DELETE')}</Text>
                     <View style={styles.inputContainer}>
                         <TextInput
                             style={styles.input}
-                            placeholder="Palabra a borrar..."
+                            placeholder={t('ADD_WORD_PLACEHOLDER')}
                             placeholderTextColor="#64748b"
                             value={wordToDelete}
                             onChangeText={setWordToDelete}
                             autoCapitalize="none"
                         />
                         <Button
-                            title="Borrar"
+                            title={t('DELETE')}
                             onPress={handleDeleteWord}
                             variant="primary"
                             style={styles.addButton}
@@ -215,15 +274,10 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 16,
     },
-    description: {
-        color: '#94a3b8',
-        fontSize: 16,
-        marginBottom: 24,
-        lineHeight: 24,
-    },
     inputContainer: {
         flexDirection: 'row',
         gap: 12,
+        marginBottom: 20,
     },
     input: {
         flex: 1,
@@ -241,13 +295,18 @@ const styles = StyleSheet.create({
         paddingHorizontal: 0,
         height: '100%',
     },
-    pdfButtonContainer: {
-        marginTop: 32,
-        alignItems: 'center',
+    actionButtons: {
+        gap: 12,
     },
-    pdfButton: {
+    actionBtn: {
         width: '100%',
-        maxWidth: 320,
+    },
+    rowButtons: {
+        flexDirection: 'row',
+        gap: 10,
+    },
+    halfBtn: {
+        flex: 1,
     },
     deleteSection: {
         marginTop: 32,

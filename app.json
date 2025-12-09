@@ -1,36 +1,36 @@
 {
-  "expo": {
-    "name": "El Impostor",
-    "slug": "el-impostor",
-    "version": "1.0.1",
-    "orientation": "portrait",
-    "icon": "./assets/impostor-logo.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/impostor-logo.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/impostor-logo.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.unai_murillo.elimpostor"
-    },
-    "web": {
-      "favicon": "./assets/impostor-logo.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "2a7e644e-d015-408d-a8b3-f872477e070a"
-      }
+    "expo": {
+        "name": "El Impostor",
+        "slug": "el-impostor",
+        "version": "1.0.1",
+        "orientation": "portrait",
+        "icon": "./assets/icono-principal.png",
+        "userInterfaceStyle": "light",
+        "newArchEnabled": true,
+        "splash": {
+            "image": "./assets/icono-principal.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#ffffff"
+        },
+        "ios": {
+            "supportsTablet": true
+        },
+        "android": {
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/icono-principal.png",
+                "backgroundColor": "#ffffff"
+            },
+            "edgeToEdgeEnabled": true,
+            "predictiveBackGestureEnabled": false,
+            "package": "com.unai_murillo.elimpostor"
+        },
+        "web": {
+            "favicon": "./assets/icono-principal.png"
+        },
+        "extra": {
+            "eas": {
+                "projectId": "2a7e644e-d015-408d-a8b3-f872477e070a"
+            }
+        }
     }
-  }
 }

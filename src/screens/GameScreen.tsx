@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/Button';
 import { assignImpostors, selectStartPlayer } from '../services/gameLogic';
 import { loadWords } from '../services/storage';
+import { useLanguage } from '../i18n/LanguageContext';
+import { Word } from '../types';
 
 export const GameScreen = ({ navigation, route }: any) => {
     const { players } = route.params;
-    const [currentWord, setCurrentWord] = useState<string>('');
+    const { t, language } = useLanguage();
+
+    // We store the full Word object so we can show it in the correct language
+    const [currentWord, setCurrentWord] = useState<Word | null>(null);
     const [impostorIndices, setImpostorIndices] = useState<number[]>([]);
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
     const [isWordVisible, setIsWordVisible] = useState(false);
@@ -21,7 +26,7 @@ export const GameScreen = ({ navigation, route }: any) => {
     const initializeGame = async () => {
         const words = await loadWords();
         if (words.length === 0) {
-            Alert.alert('Error', 'No hay palabras disponibles');
+            Alert.alert(t('ERROR_TITLE'), 'No words available');
             navigation.goBack();
             return;
         }
@@ -57,12 +62,12 @@ export const GameScreen = ({ navigation, route }: any) => {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.centerContent}>
-                    <Text style={styles.title}>JUEGO LISTO</Text>
-                    <Text style={styles.subtitle}>Empieza el jugador:</Text>
+                    <Text style={styles.title}>{t('GAME_TITLE')}</Text>
+                    <Text style={styles.subtitle}>{t('VOTE_TIME')}</Text>
                     <Text style={styles.highlightText}>{startPlayer}</Text>
 
                     <Button
-                        title="FINALIZAR"
+                        title={t('TUTORIAL_NEXT')}
                         onPress={() => setGamePhase('reveal_impostors')}
                         variant="primary"
                         style={styles.button}
@@ -79,13 +84,15 @@ export const GameScreen = ({ navigation, route }: any) => {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.centerContent}>
-                    <Text style={styles.title}>LOS IMPOSTORES ERAN:</Text>
+                    <Text style={styles.title}>{t('ROUND_FINISHED')}</Text>
+                    <Text style={styles.subtitle}>{t('IMPOSTOR_LABEL')}:</Text>
+
                     {impostorNames.map((name, idx) => (
                         <Text key={idx} style={styles.impostorRevealText}>{name}</Text>
                     ))}
 
                     <Button
-                        title="VOLVER AL MENÚ"
+                        title={t('EXIT')}
                         onPress={() => navigation.navigate('Home')}
                         variant="primary"
                         style={styles.button}
@@ -98,11 +105,14 @@ export const GameScreen = ({ navigation, route }: any) => {
     const currentPlayerName = players[currentPlayerIndex];
     const isImpostor = impostorIndices.includes(currentPlayerIndex);
 
+    // Get word in current language
+    const displayWord = currentWord ? currentWord[language] : '';
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.phaseText}>
-                    Jugador {currentPlayerIndex + 1} de {players.length}
+                    {t('PLAYERS_TITLE')} {currentPlayerIndex + 1} / {players.length}
                 </Text>
             </View>
 
@@ -112,17 +122,19 @@ export const GameScreen = ({ navigation, route }: any) => {
                 {isWordVisible ? (
                     <>
                         <View style={styles.card}>
-                            <Text style={styles.cardTitle}>TU PALABRA ES:</Text>
+                            <Text style={styles.cardTitle}>{t('SECRET_WORD_LABEL')}:</Text>
                             <Text style={[styles.wordText, isImpostor && styles.impostorText]}>
-                                {isImpostor ? 'ERES EL IMPOSTOR' : currentWord.toUpperCase()}
+                                {isImpostor ? t('IMPOSTOR_LABEL') : displayWord.toUpperCase()}
                             </Text>
-                            <Text style={styles.cardHint}>
-                                {isImpostor ? 'Intenta pasar desapercibido' : 'Memoriza tu palabra'}
-                            </Text>
+                            <ScrollView style={styles.hintContainer}>
+                                <Text style={styles.cardHint}>
+                                    {isImpostor ? t('TUTORIAL_DESC_3') : t('TUTORIAL_DESC_4')}
+                                </Text>
+                            </ScrollView>
                         </View>
                         <View style={styles.nextButtonContainer}>
                             <Button
-                                title={currentPlayerIndex === players.length - 1 ? "COMENZAR JUEGO" : "SIGUIENTE JUGADOR"}
+                                title={currentPlayerIndex === players.length - 1 ? t('START_GAME') : t('TUTORIAL_NEXT').toUpperCase()}
                                 onPress={handleNext}
                                 variant="primary"
                                 style={styles.button}
@@ -131,7 +143,7 @@ export const GameScreen = ({ navigation, route }: any) => {
                     </>
                 ) : (
                     <Text style={styles.instruction}>
-                        Pasa el móvil a {currentPlayerName} y pulsa "Ver Palabra"
+                        {t('PASS_DEVICE')}
                     </Text>
                 )}
             </View>
@@ -139,7 +151,7 @@ export const GameScreen = ({ navigation, route }: any) => {
             <View style={styles.footer}>
                 {!isWordVisible && (
                     <Button
-                        title="VER PALABRA"
+                        title={t('SHOW_ROLE')}
                         onPress={handleReveal}
                         variant="secondary"
                         style={styles.button}
@@ -180,7 +192,7 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontWeight: '800',
         color: '#f8fafc',
-        marginBottom: 40,
+        marginBottom: 20,
         textAlign: 'center',
     },
     instruction: {
@@ -191,7 +203,7 @@ const styles = StyleSheet.create({
     },
     card: {
         backgroundColor: '#1e293b',
-        padding: 32,
+        padding: 24,
         borderRadius: 24,
         width: '100%',
         alignItems: 'center',
@@ -202,27 +214,37 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 20,
         elevation: 10,
+        minHeight: 300, // Make card taller
+        justifyContent: 'center',
     },
     cardTitle: {
         color: '#94a3b8',
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: '700',
-        marginBottom: 16,
+        marginBottom: 20,
         letterSpacing: 1,
+        textTransform: 'uppercase',
     },
     wordText: {
-        fontSize: 32,
+        fontSize: 36, // Bigger font
         fontWeight: '900',
         color: '#3b82f6',
         textAlign: 'center',
-        marginBottom: 16,
+        marginBottom: 24,
     },
     impostorText: {
         color: '#ef4444',
+        fontSize: 28, // Adjust for longer text if needed
+    },
+    hintContainer: {
+        width: '100%',
+        maxHeight: 150,
     },
     cardHint: {
-        color: '#64748b',
-        fontSize: 14,
+        color: '#94a3b8',
+        fontSize: 18, // Bigger font for readability
+        textAlign: 'center',
+        lineHeight: 26,
     },
     title: {
         fontSize: 36,
@@ -235,6 +257,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#94a3b8',
         marginBottom: 12,
+        textAlign: 'center',
     },
     highlightText: {
         fontSize: 40,

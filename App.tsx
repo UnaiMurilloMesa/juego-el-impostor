@@ -7,24 +7,28 @@ import { AddPlayersScreen } from './src/screens/AddPlayersScreen';
 import { GameScreen } from './src/screens/GameScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { LanguageProvider } from './src/i18n/LanguageContext';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: '#0f172a' }
-          }}
-        >
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="AddWords" component={AddWordsScreen} />
-          <Stack.Screen name="AddPlayers" component={AddPlayersScreen} />
-          <Stack.Screen name="Game" component={GameScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
-  );
+    return (
+        <SafeAreaProvider>
+            <LanguageProvider>
+                <NavigationContainer>
+                    <Stack.Navigator
+                        screenOptions={{
+                            headerShown: false,
+                            contentStyle: { backgroundColor: '#0f172a' }
+                        }}
+                    >
+                        <Stack.Screen name="Home" component={HomeScreen} />
+                        <Stack.Screen name="AddWords" component={AddWordsScreen} />
+                        <Stack.Screen name="AddPlayers" component={AddPlayersScreen} />
+                        <Stack.Screen name="Game" component={GameScreen} />
+                    </Stack.Navigator>
+                </NavigationContainer>
+            </LanguageProvider>
+        </SafeAreaProvider>
+    );
 }

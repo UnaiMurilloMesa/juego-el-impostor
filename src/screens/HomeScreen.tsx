@@ -3,18 +3,24 @@ import { View, Text, StyleSheet, StatusBar, Alert, Pressable } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/Button';
 import { TutorialModal } from '../components/TutorialModal';
+import { useLanguage } from '../i18n/LanguageContext';
 import { loadPlayers } from '../services/playerStorage';
 
 export const HomeScreen = ({ navigation }: any) => {
     const [showTutorial, setShowTutorial] = useState(false);
+    const { t, language, setLanguage } = useLanguage();
 
     const handleStartGame = async () => {
         const players = await loadPlayers();
         if (players.length < 3) {
-            Alert.alert('Error', 'Necesitas al menos 3 jugadores para empezar.');
+            Alert.alert(t('ERROR_TITLE'), t('MIN_PLAYERS_ERROR'));
             return;
         }
         navigation.navigate('Game', { players });
+    };
+
+    const toggleLanguage = () => {
+        setLanguage(language === 'es' ? 'en' : 'es');
     };
 
     return (
@@ -27,8 +33,8 @@ export const HomeScreen = ({ navigation }: any) => {
 
             <View style={styles.content}>
                 <View style={styles.topBar}>
-                    <Pressable style={styles.iconButton}>
-                        <Text style={styles.iconButtonText}>ES</Text>
+                    <Pressable style={styles.iconButton} onPress={toggleLanguage}>
+                        <Text style={styles.iconButtonText}>{language.toUpperCase()}</Text>
                     </Pressable>
                     <Pressable
                         style={styles.iconButton}
@@ -39,24 +45,24 @@ export const HomeScreen = ({ navigation }: any) => {
                 </View>
 
                 <View style={styles.header}>
-                    <Text style={styles.title}>EL IMPOSTOR</Text>
+                    <Text style={styles.title}>{t('GAME_TITLE')}</Text>
                 </View>
 
                 <View style={styles.buttonContainer}>
                     <Button
-                        title="EMPEZAR JUEGO"
+                        title={t('START_GAME')}
                         onPress={handleStartGame}
                         variant="primary"
                         style={styles.button}
                     />
                     <Button
-                        title="AÑADIR JUGADORES"
+                        title={t('ADD_PLAYERS')}
                         onPress={() => navigation.navigate('AddPlayers')}
                         variant="secondary"
                         style={styles.button}
                     />
                     <Button
-                        title="AÑADIR PALABRAS"
+                        title={t('ADD_WORDS')}
                         onPress={() => navigation.navigate('AddWords')}
                         variant="secondary"
                         style={styles.button}

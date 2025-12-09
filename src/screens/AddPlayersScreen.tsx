@@ -3,10 +3,12 @@ import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity, FlatList, K
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../components/Button';
 import { loadPlayers, addPlayer, savePlayers } from '../services/playerStorage';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export const AddPlayersScreen = ({ navigation }: any) => {
     const [players, setPlayers] = useState<string[]>([]);
     const [newPlayer, setNewPlayer] = useState('');
+    const { t } = useLanguage();
 
     useEffect(() => {
         loadPlayers().then(setPlayers);
@@ -22,17 +24,30 @@ export const AddPlayersScreen = ({ navigation }: any) => {
             Keyboard.dismiss();
         } catch (error: any) {
             if (error.message === 'DUPLICATE_PLAYER') {
-                Alert.alert('Error', 'Este jugador ya está en la lista');
+                Alert.alert(t('ERROR_TITLE'), t('DUPLICATE_PLAYER'));
             } else {
-                Alert.alert('Error', 'No se pudo añadir el jugador');
+                Alert.alert(t('ERROR_TITLE'), 'Could not add player');
             }
         }
     };
 
     const handleDeletePlayer = async (index: number) => {
-        const updatedPlayers = players.filter((_, i) => i !== index);
-        await savePlayers(updatedPlayers);
-        setPlayers(updatedPlayers);
+        Alert.alert(
+            t('DELETE_PLAYER_TITLE'),
+            t('DELETE_PLAYER_MSG'),
+            [
+                { text: t('CANCEL'), style: 'cancel' },
+                {
+                    text: t('DELETE'),
+                    style: 'destructive',
+                    onPress: async () => {
+                        const updatedPlayers = players.filter((_, i) => i !== index);
+                        await savePlayers(updatedPlayers);
+                        setPlayers(updatedPlayers);
+                    }
+                }
+            ]
+        );
     };
 
     const movePlayer = async (index: number, direction: 'up' | 'down') => {
@@ -54,29 +69,29 @@ export const AddPlayersScreen = ({ navigation }: any) => {
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Text style={styles.backButtonText}>← Volver</Text>
+                    <Text style={styles.backButtonText}>← {t('BACK_BTN')}</Text>
                 </TouchableOpacity>
-                <Text style={styles.title}>Jugadores</Text>
+                <Text style={styles.title}>{t('PLAYERS_TITLE')}</Text>
             </View>
 
             <View style={styles.content}>
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={styles.input}
-                        placeholder="Nombre del jugador..."
+                        placeholder={t('ADD_PLAYER_PLACEHOLDER')}
                         placeholderTextColor="#64748b"
                         value={newPlayer}
                         onChangeText={setNewPlayer}
                     />
                     <Button
-                        title="Añadir"
+                        title={t('ADD_BUTTON')}
                         onPress={handleAddPlayer}
                         variant="primary"
                         style={styles.addButton}
                     />
                 </View>
 
-                <Text style={styles.listTitle}>Lista de Jugadores ({players.length})</Text>
+                <Text style={styles.listTitle}>{t('PLAYERS_TITLE')} ({players.length})</Text>
                 <FlatList
                     data={players}
                     keyExtractor={(item, index) => `${item}-${index}`}
